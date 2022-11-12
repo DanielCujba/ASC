@@ -11,15 +11,23 @@
     11                                  ; our data is declared here (the variables needed by our program)
     12                                  segment data use32 class=data
     13                                      ; ...
-    14 00000000 FF                          a db 255
-    15 00000001 00010000                    b dd 100h
-    16                                  
+    14 00000000 01020304                    S db 1,2,3,4
+    15                                      l equ $-S
+    16 00000004 <res 00000006>              D resw l-1
     17                                  
     18                                  ; our code starts here
     19                                  segment code use32 class=code
     20                                      start:
-    21                                         
-    22                                          
-    23                                          ; exit(0)
-    24 00000000 6A00                            push    dword 0      ; push the parameter for exit onto the stack
-    25 00000002 FF15[00000000]                  call    [exit]       ; call exit to terminate the program
+    21                                          ; ...
+    22 00000000 B900000000                      mov ECX,0
+    23                                          jmp_label:
+    24 00000005 8A81[00000000]                      mov AL,[S+ECX]
+    25 0000000B 8A99[01000000]                      mov BL,[S+ECX+1]
+    26 00000011 F6EB                                imul BL
+    27 00000013 66898409[04000000]                  mov [D+2*ECX],AX
+    28 0000001B 41                                  inc ECX
+    29 0000001C 83F903                              cmp ECX,l-1
+    30 0000001F 72E4                                jb jmp_label
+    31                                          ; exit(0)
+    32 00000021 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    33 00000023 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

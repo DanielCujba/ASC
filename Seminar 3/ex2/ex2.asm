@@ -11,14 +11,11 @@ import exit msvcrt.dll    ; exit is a function that ends the calling process. It
 ; our data is declared here (the variables needed by our program)
 segment data use32 class=data
     ; ...
-    a db 255
-    b dd 100h
-
 
 ; our code starts here
 segment code use32 class=code
     start:
-       
+        ; ...
         
         ; exit(0)
         push    dword 0      ; push the parameter for exit onto the stack
