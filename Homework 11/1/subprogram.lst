@@ -1,0 +1,14 @@
+     1                                  %ifdef _SUBPROGRAM_ASM_
+     2                                  %define _SUBPROGRAM_ASM_ 
+     3                                  
+     4                                  subprogram:
+     5                                      mov ECX,8
+     6                                      mov EBX,[ESP+4]
+     7                                      mov EAX,[ESP+8]
+     8                                      label:
+     9                                          mov [EBX+ECX],EAX
+    10                                          rol EAX,4
+    11                                      loop label
+    12                                      ret
+    13                                  
+    14                                  %endif

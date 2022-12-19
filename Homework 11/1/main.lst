@@ -1,0 +1,33 @@
+     1                                  ;An unsigned number a on 32 bits is given. Print the hexadecimal 
+     2                                  ;representation of a, but also the results of the circular permutations 
+     3                                  ;of its hex digits.
+     4                                  
+     5                                  bits 32
+     6                                  global start
+     7                                  
+     8                                  extern exit,printf
+     9                                  import exit msvcrt.dll
+    10                                  import printf msvcrt.dll
+    11                                  
+    12                                  
+    13                                  segment data use32 class=data
+    14 00000000 25582000                    format db "%X ",0
+    15 00000004 EFCDAB12                    a dd 12ABCDEFh
+    16 00000008 <res 0000001C>              permutations resd 7
+    17                                  
+    18                                  segment code use32 class=code
+    19                                  start:
+    20 00000000 FF35[04000000]              push dword [a]
+    21 00000006 FF35[08000000]              push dword [permutations]
+    22                                      call subprogram
+    22          ******************       error: symbol `subprogram' undefined
+    23 0000000C 83C408                      add ESP,4*2
+    24                                      label:
+    25 0000000F FFB1[08000000]              push dword [permutations+ECX]
+    26 00000015 FF35[00000000]              push dword [format]
+    27 0000001B FF15[00000000]              call [printf]
+    28 00000021 83C408                      add ESP,4*2
+    29 00000024 E2E9                        loop label
+    30 00000026 6A00                        push dword 0
+    31 00000028 FF15[00000000]              call [exit]
+    32                                  
