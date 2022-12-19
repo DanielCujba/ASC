@@ -9,38 +9,21 @@ import exit msvcrt.dll    ; exit is a function that ends the calling process. It
                           ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
 
 ; our data is declared here (the variables needed by our program)
-
-;Two character strings S1 and S2 are given. Obtain the string D by concatenating the elements found on odd positions in S2 and the elements found on even positions in S1.
-
 segment data use32 class=data
-    S1 db 'abcbef'
-    l1 equ $-S1
-    S2 db '123456'
-    l2 equ $-S2
-    D resb l1/2+l2/2+l2 % 2
-
+    ; ...
+    s1 dw 1,10,32
+    l1 equ ($-s1)/2
+    s2 dw 0FF23h,0AF21h,0B25h
+    l2 equ ($-s2)/2
+    s resb l1+l2
+    e db 10
 ; our code starts here
 segment code use32 class=code
     start:
         ; ...
-        mov EDI,0
-        mov ESI,0
-        S2_label:
-            mov AL,[S2+ESI]
-            mov [D+EDI],AL
-            inc EDI
-            add ESI,2
-            cmp ESI,l2
-            jb S2_label
-        mov ESI,0
-        S1_label:
-            mov AL,[S1+1+ESI*2]
-            mov [D+EDI],AL
-            inc ESI
-            inc EDI
-            cmp ESI,l1/2
-            jb S1_label
-        
+mov ax,256
+mov bl,1
+div bl
         ; exit(0)
         push    dword 0      ; push the parameter for exit onto the stack
         call    [exit]       ; call exit to terminate the program

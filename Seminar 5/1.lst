@@ -1,0 +1,34 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit,printf,scanf               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  import printf msvcrt.dll  ; printf is a function that prints a string to the standard output. It is defined in msvcrt.dll
+    11                                  import scanf msvcrt.dll   ; scanf is a function that reads a string from the standard input. It is defined in msvcrt.dll
+    12                                  
+    13                                  ; our data is declared here (the variables needed by our program)
+    14                                  segment data use32 class=data
+    15                                      ; ...
+    16 00000000 6E3D00                      message db "n=",0
+    17 00000003 00000000                    n dd 0
+    18 00000007 256400                      read db "%d",0
+    19                                  
+    20                                  ; our code starts here
+    21                                  segment code use32 class=code
+    22                                      start:
+    23                                          ; ...
+    24                                          ;Write a programs that prints the message "n=" on the screen and then read from keyword the value for the signed number n
+    25 00000000 68[00000000]                    push dword message
+    26 00000005 FF15[00000000]                  call [printf]
+    27 0000000B 83C604                          add ESI,4*1
+    28 0000000E 68[03000000]                    push dword n
+    29 00000013 68[07000000]                    push dword read
+    30 00000018 FF15[00000000]                  call [scanf]
+    31 0000001E 83C608                          add ESI,4*2
+    32                                          ; exit(0)
+    33 00000021 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    34 00000023 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

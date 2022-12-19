@@ -1,0 +1,32 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13                                      ; ...
+    14 00000000 636F616965                  a db "coaie"
+    15                                      l equ $-$$
+    16 00000005 <res 00000005>              b resb l
+    17                                  ; our code starts here
+    18                                  segment code use32 class=code
+    19                                      start:
+    20                                          ; ...
+    21 00000000 BE[00000000]                    mov ESI,a
+    22 00000005 BF[05000000]                    mov EDI,b
+    23 0000000A B905000000                      mov ECX,l
+    24 0000000F FC                              cld
+    25                                          label:
+    26 00000010 AC                                  lodsb
+    27 00000011 2C20                                sub al,"a"-"A"
+    28 00000013 AA                                  stosb
+    29 00000014 E2FA                            loop label
+    30                                          ; exit(0)
+    31 00000016 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    32 00000018 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

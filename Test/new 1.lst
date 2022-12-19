@@ -1,0 +1,26 @@
+     1                                  ; The code below will calculate the result of some arithmetic operations in the EAX register, save the value of the registers, then display the result value and restore the value of the registers.
+     2                                  bits 32
+     3                                  
+     4                                  global start        
+     5                                  
+     6                                  ; declare extern functions
+     7                                  extern exit, printf  
+     8                                  import exit msvcrt.dll    
+     9                                  import printf msvcrt.dll    ; tell assembler function is found in library msvcrt.dll
+    10                                                            
+    11                                  segment data use32 class=data
+    12                                  	
+    13                                  	
+    14                                  segment code use32 class=code
+    15                                  	start:
+    16                                  		; will calculate 20 + 123 + 7 in EAX
+    17 00000000 B00F                    		mov al, 250>>4
+    18 00000002 B0FF                            mov al,0ffffh>>4
+    18          ******************       warning: byte data exceeds bounds [-w+number-overflow]
+    19 00000004 B00E                            mov al,0efffh>>12
+    20 00000006 B0FF                            mov al,-1>>4
+    20          ******************       warning: byte data exceeds bounds [-w+number-overflow]
+    21 00000008 B0FF                            mov al,-1>>12
+    21          ******************       warning: byte data exceeds bounds [-w+number-overflow]
+    22 0000000A 6A00                    		push dword 0      ; we place on stack parameter for exit
+    23 0000000C FF15[00000000]          		call [exit]       ; call exit to end the program

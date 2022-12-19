@@ -1,0 +1,51 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit,scanf,printf               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                  import scanf msvcrt.dll
+    10                                  import printf msvcrt.dll
+    11                                  
+    12                                  ; our data is declared here (the variables needed by our program)
+    13                                  
+    14                                  ;Read two numbers a and b (in base 10) from the keyboard. Calculate and print their arithmetic average in base 16
+    15                                  
+    16                                  segment data use32 class=data
+    17 00000000 256400                      read_query db "%d",0
+    18 00000003 546865206172697468-         write_query db "The arithmetic average in base 16 is: 0x%08X",0
+    18 0000000C 6D6574696320617665-
+    18 00000015 7261676520696E2062-
+    18 0000001E 617365203136206973-
+    18 00000027 3A2030782530385800 
+    19 00000030 00000000                    a dd 0
+    20 00000034 00000000                    b dd 0
+    21                                      
+    22                                  ; our code starts here
+    23                                  segment code use32 class=code
+    24                                      start:
+    25                                          ; ...
+    26 00000000 68[30000000]                    push dword a
+    27 00000005 68[00000000]                    push dword read_query
+    28 0000000A FF15[00000000]                  call [scanf]
+    29 00000010 83C408                          add ESP,4*2
+    30                                          
+    31 00000013 68[34000000]                    push dword b
+    32 00000018 68[00000000]                    push dword read_query
+    33 0000001D FF15[00000000]                  call [scanf]
+    34 00000023 83C408                          add ESP,4*2
+    35                                          
+    36 00000026 A1[30000000]                    mov EAX,[a]
+    37 0000002B 0305[34000000]                  add EAX,[b]
+    38 00000031 D1F8                            sar EAX,1
+    39                                          
+    40 00000033 50                              push EAX
+    41 00000034 68[03000000]                    push write_query
+    42 00000039 FF15[00000000]                  call [printf]
+    43 0000003F 83C408                          add ESP, 4*2
+    44                                          
+    45                                          ; exit(0)
+    46 00000042 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    47 00000044 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

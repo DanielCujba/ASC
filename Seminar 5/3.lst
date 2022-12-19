@@ -1,0 +1,94 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit,fopen,fprintf,fscanf,fread,fwrite,remove,rename,fclose
+     8                                  import exit msvcrt.dll  ; exit is a function that terminates the program. It is defined in msvcrt.dll
+     9                                  import fopen msvcrt.dll   ; fopen is a function that opens a file. It is defined in msvcrt.dll
+    10                                  import fprintf msvcrt.dll ; fprintf is a function that prints a formatted string to a file. It is defined in msvcrt.dll
+    11                                  import fscanf msvcrt.dll  ; fscanf is a function that reads a formatted string from a file. It is defined in msvcrt.dll
+    12                                  import fread msvcrt.dll   ; fread is a function that reads a block of data from a file. It is defined in msvcrt.dll
+    13                                  import fwrite msvcrt.dll  ; fwrite is a function that writes a block of data to a file. It is defined in msvcrt.dll
+    14                                  import remove msvcrt.dll  ; remove is a function that deletes a file. It is defined in msvcrt.dll
+    15                                  import rename msvcrt.dll  ; rename is a function that renames a file. It is defined in msvcrt.dll
+    16                                  import fclose msvcrt.dll  ; fclose is a function that closes a file. It is defined in msvcrt.dll
+    17                                  
+    18                                  
+    19                                  ; our data is declared here (the variables needed by our program)
+    20                                  segment data use32 class=data
+    21                                      ; ...
+    22 00000000 612E74787400                file_path_read db "a.txt", 0 ; the path to the file we want to open
+    23 00000006 622E74787400                file_path_write db "b.txt", 0 ; the path to the file we want to open
+    24 0000000C 7200                        access_mode_read db "r", 0       ; the access mode we want to use when opening the file
+    25 0000000E 7700                        access_mode_write db "w", 0      ; the access mode we want to use when opening the file
+    26 00000010 00000000                    file_read dd 0 ; the file pointer returned by fopen
+    27 00000014 00000000                    file_write dd 0 ; the file pointer returned by fopen
+    28 00000018 00000000                    read_value dd 0 ; the value read from the file
+    29                                  
+    30                                  ; our code starts here
+    31                                  segment code use32 class=code
+    32                                      start:
+    33                                          ; ...
+    34                                          ; open the file
+    35 00000000 68[0C000000]                    push    dword access_mode_read ; push the parameter for fopen onto the stack
+    36 00000005 68[00000000]                    push    dword file_path_read ; push the parameter for fopen onto the stack
+    37 0000000A FF15[00000000]                  call   [fopen]         ; call fopen to open the file
+    38 00000010 83C408                          add    esp, 4*2         ; remove the parameters from the stack
+    39 00000013 83F800                          cmp     eax, 0         ; compare the return value of fopen with 0
+    40 00000016 0F84A7000000                    jz     exit_label           ; if fopen returned 0, then the file could not be opened, so we exit_label the program
+    41 0000001C A3[10000000]                    mov     [file_read], eax    ; save the file pointer returned by fopen in the variable file
+    42 00000021 68[0E000000]                    push   dword access_mode_write ; push the parameter for fopen onto the stack
+    43 00000026 68[06000000]                    push   dword file_path_write ; push the parameter for fopen onto the stack
+    44 0000002B FF15[00000000]                  call   [fopen]         ; call fopen to open the file
+    45 00000031 83C408                          add    esp, 4*2         ; remove the parameters from the stack
+    46 00000034 83F800                          cmp     eax, 0         ; compare the return value of fopen with 0
+    47 00000037 0F8486000000                    jz     exit_label           ; if fopen returned 0, then the file could not be opened, so we exit_label the program
+    48 0000003D A3[14000000]                    mov     [file_write], eax    ; save the file pointer returned by fopen in the variable file
+    49                                  
+    50                                          ; read the file
+    51                                          loop_label:
+    52 00000042 FF35[10000000]                  push    dword [file_read] ; push the parameter for fread onto the stack
+    53 00000048 6A01                            push    dword 1      ; push the parameter for fread onto the stack
+    54 0000004A 6A01                            push    dword 1      ; push the parameter for fread onto the stack
+    55 0000004C 68[18000000]                    push    dword read_value ; push the parameter for fread onto the stack
+    56 00000051 FF15[00000000]                  call   [fread]         ; call fread to read the file
+    57 00000057 83C410                          add    esp, 4*4         ; remove the parameters from the stack
+    58 0000005A 83F800                          cmp    eax, 0         ; compare the return value of fread with 0
+    59 0000005D 7425                            jz     end           ; if fread returned 0, then the file could not be read, so we exit_label the program
+    60 0000005F FE05[18000000]                  inc byte [read_value] ; increment the value read from the file
+    61 00000065 FF35[14000000]                  push    dword [file_write] ; push the parameter for fwrite onto the stack
+    62 0000006B 6A01                            push    dword 1      ; push the parameter for fwrite onto the stack
+    63 0000006D 6A01                            push    dword 1      ; push the parameter for fwrite onto the stack
+    64 0000006F 68[18000000]                    push    dword read_value ; push the parameter for fwrite onto the stack
+    65 00000074 FF15[00000000]                  call   [fwrite]         ; call fwrite to write the file
+    66 0000007A 83C410                          add   esp, 4*4         ; remove the parameters from the stack
+    67 0000007D 83F800                          cmp    eax, 0         ; compare the return value of fwrite with 0
+    68 00000080 7441                            jz     exit_label           ; if fwrite returned 0, then the file could not be written, so we exit_label the program
+    69 00000082 EBBE                            jmp loop_label
+    70                                          end:
+    71                                          ; close the file
+    72 00000084 FF35[10000000]                  push    dword [file_read] ; push the parameter for fclose onto the stack
+    73 0000008A FF15[00000000]                  call   [fclose]         ; call fclose to close the file
+    74 00000090 83C404                          add    esp, 4         ; remove the parameter from the stack
+    75 00000093 FF35[14000000]                  push    dword [file_write] ; push the parameter for fclose onto the stack
+    76 00000099 FF15[00000000]                  call   [fclose]         ; call fclose to close the file
+    77 0000009F 83C404                          add    esp, 4         ; remove the parameter from the stack
+    78                                  
+    79                                          ;remove a.txt file
+    80 000000A2 68[00000000]                    push    dword file_path_read ; push the parameter for remove onto the stack
+    81 000000A7 FF15[00000000]                  call   [remove]         ; call remove to remove the file
+    82 000000AD 83C404                          add    esp, 4         ; remove the parameter from the stack
+    83                                  
+    84                                  
+    85                                          ;rename b.txt to a.txt
+    86 000000B0 68[00000000]                    push    dword file_path_read ; push the parameter for rename onto the stack
+    87 000000B5 68[06000000]                    push    dword file_path_write ; push the parameter for rename onto the stack
+    88 000000BA FF15[00000000]                  call   [rename]         ; call rename to rename the file
+    89 000000C0 83C408                          add    esp, 4*2         ; remove the parameters from the stack
+    90                                  
+    91                                  
+    92                                          exit_label:
+    93 000000C3 6A00                            push    dword 0      ; push the parameter for exit_label onto the stack
+    94 000000C5 FF15[00000000]                  call    [exit]       ; call exit_label to terminate the program

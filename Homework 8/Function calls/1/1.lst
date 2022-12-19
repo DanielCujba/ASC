@@ -1,0 +1,42 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit,scanf               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  import scanf msvcrt.dll
+    11                                                            
+    12                                  ;Read two numbers a and b (in base 10) from the keyboard and calculate their product. This value will be stored in a variable called "result" (defined in the data segment).
+    13                                  
+    14                                  
+    15                                  segment data use32 class=data
+    16 00000000 256400                      query db "%d",0
+    17 00000003 00000000                    a dd 0
+    18 00000007 00000000                    b dd 0
+    19 0000000B 0000000000000000            result dq 0
+    20                                      
+    21                                  
+    22                                  ; our code starts here
+    23                                  segment code use32 class=code
+    24                                      start:
+    25                                          ; ...
+    26 00000000 68[03000000]                    push dword a
+    27 00000005 68[00000000]                    push dword query
+    28 0000000A FF15[00000000]                  call [scanf]
+    29 00000010 83C408                          add ESP,4*2
+    30                                          
+    31 00000013 68[07000000]                    push dword b
+    32 00000018 68[00000000]                    push dword query
+    33 0000001D FF15[00000000]                  call [scanf]
+    34 00000023 83C408                          add ESP,4*2
+    35                                          
+    36 00000026 A1[03000000]                    mov EAX,[a]
+    37 0000002B F72D[07000000]                  imul dword [b]
+    38 00000031 A3[0B000000]                    mov [result],EAX
+    39 00000036 8915[0B000000]                  mov [result],EDX
+    40                                          ; exit(0)
+    41 0000003C 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    42 0000003E FF15[00000000]                  call    [exit]       ; call exit to terminate the program
